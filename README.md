@@ -1,165 +1,538 @@
-# AlumniHub
+# 🎓 AlumniHub - Alumni-Student Networking Platform
 
-A full-stack web application connecting alumni, students, and administrators for events, donations, and networking.
+<div align="center">
 
-## 📁 Project Structure
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?logo=mongodb)](https://www.mongodb.com/)
+[![Express](https://img.shields.io/badge/Express-5.0-000000?logo=express)](https://expressjs.com/)
+
+**A comprehensive full-stack platform bridging the gap between students and alumni through mentorship, career opportunities, and community building.**
+
+[Live Demo](#) • [Report Bug](#) • [Request Feature](#)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#-system-architecture)
+- [Getting Started](#-getting-started)
+- [API Documentation](#-api-documentation)
+- [Database Schema](#-database-schema)
+- [Project Structure](#-project-structure)
+- [Environment Variables](#-environment-variables)
+
+---
+
+## 🌟 Overview
+
+AlumniHub is a modern, feature-rich platform designed to foster meaningful connections between students, alumni, and administrators. The platform facilitates networking, mentorship, job opportunities, event management, and community building through an intuitive and responsive interface.
+
+### 🎯 Problem Statement
+
+Educational institutions struggle to maintain active alumni engagement and provide students with valuable industry connections. Traditional methods lack scalability and real-time interaction capabilities.
+
+### 💡 Solution
+
+AlumniHub provides a centralized, interactive platform that:
+- Connects students with alumni for mentorship and career guidance
+- Enables seamless communication through posts, comments, and direct messaging
+- Facilitates event organization and participation
+- Streamlines job postings and applications
+- Manages donation campaigns transparently
+- Provides powerful admin tools for community moderation
+
+---
+
+## ✨ Key Features
+
+### 👤 User Management
+- **Multi-role Authentication** (Student, Alumni, Admin)
+- JWT-based secure authentication with refresh tokens
+- Password reset with OTP verification via email
+- Profile management with avatar uploads
+- Advanced user search and filtering
+
+### 💬 Communication
+- **Reddit-style Post System** with upvote/downvote functionality
+- Nested comments with @mentions
+- Real-time notifications
+- Direct messaging between users
+- Content moderation and filtering
+
+### 🎉 Events
+- Create and manage events with rich details
+- RSVP tracking and attendee management
+- Event categorization and search
+- Upcoming and past events timeline
+- Admin approval workflow
+
+### 💼 Job Board
+- Alumni can post job opportunities
+- Students can browse and apply for jobs
+- Job verification by admins
+- Filter by company, location, and job type
+- Application tracking
+
+### 💰 Donations
+- Create donation campaigns with goals
+- Track donation progress with visual indicators
+- Multiple payment gateway integration ready
+- Donation history and receipts
+- Admin oversight and reporting
+
+### 📊 Admin Dashboard
+- Comprehensive analytics and insights
+- User management and verification
+- Content moderation tools
+- Report handling system
+- Activity monitoring
+
+### 🎨 UI/UX
+- Responsive design (mobile, tablet, desktop)
+- Smooth animations with Framer Motion
+- Progressive Web App (PWA) capabilities
+- Modern design with TailwindCSS & Shadcn UI
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | UI library with latest features |
+| **TypeScript** | Type-safe JavaScript |
+| **Vite** | Lightning-fast build tool |
+| **TailwindCSS** | Utility-first CSS framework |
+| **Shadcn/ui** | High-quality React components |
+| **React Router v6** | Client-side routing |
+| **Axios** | HTTP client with interceptors |
+| **Framer Motion** | Animation library |
+| **Recharts** | Data visualization |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Node.js 18+** | JavaScript runtime |
+| **Express 5** | Web application framework |
+| **MongoDB 7** | NoSQL database |
+| **Mongoose** | ODM for MongoDB |
+| **JWT** | Token-based authentication |
+| **bcryptjs** | Password hashing |
+| **Multer** | File upload handling |
+| **Cloudinary** | Image/file storage |
+| **Nodemailer** | Email service |
+
+### Development Tools
+- **ESLint & Prettier** - Code quality and formatting
+- **Git** - Version control
+- **Postman** - API testing
+- **MongoDB Compass** - Database management
+
+---
+
+## 🏗 System Architecture
 
 ```
-alumnihub/
-├── backend/                 # Node.js/Express backend
-│   ├── src/
-│   │   └── config/         # Database and configuration files
-│   │       └── db.js
-│   ├── app.js              # Express app configuration
-│   ├── server.js           # Server entry point
-│   ├── package.json
-│   └── readme.md
-│
-├── frontend/               # React + Vite frontend
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── common/     # Shared components
-│   │   │   ├── Admin/      # Admin-specific components
-│   │   │   └── Donate/     # Donation components
-│   │   ├── pages/          # Page components
-│   │   │   ├── Home.jsx
-│   │   │   ├── events.jsx
-│   │   │   ├── login.jsx
-│   │   │   ├── register.jsx
-│   │   │   ├── Donate.jsx
-│   │   │   ├── AlumniDashboard.jsx
-│   │   │   └── StudentDashboard.jsx
-│   │   ├── context/        # React Context (Auth, etc.)
-│   │   ├── services/       # API service layer
-│   │   ├── layout/         # Layout components
-│   │   ├── styles/         # CSS files
-│   │   └── assets/         # Images, fonts, etc.
-│   ├── public/             # Static assets
-│   ├── index.html          # Entry HTML
-│   ├── package.json
-│   ├── vite.config.js      # Vite configuration
-│   ├── tailwind.config.js  # Tailwind CSS config
-│   └── eslint.config.js    # ESLint configuration
-│
-└── README.md               # This file
+┌─────────────────────────────────────────────────────────────┐
+│                         Frontend (React)                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Pages      │  │  Components  │  │   Services   │      │
+│  │ (Views/UI)   │  │ (Reusable)   │  │  (API calls) │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└────────────────────────────┬────────────────────────────────┘
+                             │ HTTP/HTTPS (REST API)
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│                     Backend (Express.js)                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Routes     │  │ Controllers  │  │ Middlewares  │      │
+│  │ (Endpoints)  │  │  (Logic)     │  │ (Auth/Valid) │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │   Models     │  │   Services   │                         │
+│  │  (Mongoose)  │  │ (Email/OTP)  │                         │
+│  └──────────────┘  └──────────────┘                         │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                   ┌─────────┴──────────┐
+                   │                    │
+         ┌─────────▼──────────┐  ┌─────▼──────────┐
+         │   MongoDB Atlas    │  │   Cloudinary   │
+         │  (Database)        │  │ (File Storage) │
+         └────────────────────┘  └────────────────┘
 ```
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB (local or cloud instance)
-
-### Backend Setup
-
 ```bash
-# Navigate to backend directory
+Node.js >= 18.0.0
+npm >= 9.0.0
+MongoDB >= 7.0
+Git
+```
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/krishpatel2310/Alumnihub.git
+cd Alumnihub
+```
+
+2. **Backend Setup**
+```bash
 cd backend
-
-# Install dependencies
 npm install
 
-# Create .env file with your configuration
-# Example:
-# PORT=5000
-# MONGODB_URI=mongodb://localhost:27017/alumnihub
-# JWT_SECRET=your_secret_key
+# Create .env file (see Environment Variables section)
+# Add your MongoDB URI, JWT secrets, etc.
 
-# Start development server
-npm run dev
+# Start MongoDB (if running locally)
+mongod
+
+# Run backend server
+npm start
+# Server runs on http://localhost:5001
 ```
 
-### Frontend Setup
-
+3. **Frontend Setup**
 ```bash
-# Navigate to frontend directory
 cd frontend
-
-# Install dependencies
 npm install
 
 # Start development server
 npm run dev
+# Frontend runs on http://localhost:5173
 ```
 
-The frontend will be available at `http://localhost:5173`
+4. **Create Test Users (Optional)**
+```bash
+cd backend
+node create-user.js
+```
 
-## 🛠️ Technology Stack
+This creates:
+- **Student**: `student@test.com` / `password123`
+- **Alumni**: `alumni@test.com` / `password123`
+- **Admin**: `admin@test.com` / `admin123`
 
-### Frontend
-- **React 19** - UI library
-- **Vite** - Build tool and dev server
-- **React Router** - Routing
-- **Tailwind CSS** - Styling
-- **Axios** - HTTP client
-- **React Query** - Server state management
-- **Framer Motion** - Animations
+---
 
-### Backend
-- **Node.js** - Runtime environment
-- **Express** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **JWT** - Authentication
-- **bcryptjs** - Password hashing
-- **Multer** - File uploads
-- **Nodemailer** - Email service
+## 📡 API Documentation
 
-## 📋 Available Scripts
+### Authentication Endpoints
 
-### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/login` | User login | No |
+| POST | `/api/logout` | User logout | Yes |
+| POST | `/api/refresh-token` | Refresh access token | Yes |
+| POST | `/api/forgot-password` | Request password reset | No |
+| POST | `/api/verify-otp` | Verify OTP | No |
+| POST | `/api/reset-password` | Reset password | No |
 
-### Backend
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
+### User Endpoints
 
-## 🔑 Key Features
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/user/profile` | Get user profile | Yes |
+| PUT | `/api/user/profile` | Update profile | Yes |
+| GET | `/api/user/search` | Search users | Yes |
+| GET | `/api/user/:id` | Get user by ID | Yes |
+| POST | `/api/user/avatar` | Upload avatar | Yes |
 
-- **User Authentication** - Login/Register for Students, Alumni, and Admins
-- **Event Management** - Create, view, and RSVP to events
-- **Donation System** - Alumni can donate, admins can track donations
-- **Dashboards** - Role-based dashboards for different user types
-- **Responsive Design** - Mobile-friendly interface
+### Post Endpoints
 
-## 👥 User Roles
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/posts` | Get all posts | Yes |
+| POST | `/api/posts` | Create post | Yes |
+| GET | `/api/posts/:id` | Get post by ID | Yes |
+| PUT | `/api/posts/:id` | Update post | Yes |
+| DELETE | `/api/posts/:id` | Delete post | Yes |
+| POST | `/api/posts/:id/vote` | Upvote/Downvote | Yes |
+| POST | `/api/posts/:id/comment` | Add comment | Yes |
 
-1. **Student** - Can view events, RSVP, and view donation campaigns
-2. **Alumni** - Can create events, donate, and access alumni resources
-3. **Admin** - Can approve events, manage donations, and oversee users
+### Event Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/events` | Get all events | Yes |
+| POST | `/api/events` | Create event | Yes (Alumni) |
+| GET | `/api/events/:id` | Get event details | Yes |
+| PUT | `/api/events/:id` | Update event | Yes (Alumni) |
+| DELETE | `/api/events/:id` | Delete event | Yes (Alumni) |
+| POST | `/api/events/:id/rsvp` | RSVP to event | Yes |
+
+### Job Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/jobs` | Get all jobs | Yes |
+| POST | `/api/jobs` | Post a job | Yes (Alumni) |
+| GET | `/api/jobs/:id` | Get job details | Yes |
+| PUT | `/api/jobs/:id` | Update job | Yes (Alumni) |
+| DELETE | `/api/jobs/:id` | Delete job | Yes (Alumni) |
+| POST | `/api/jobs/:id/verify` | Verify job | Yes (Admin) |
+
+### Donation Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/donations` | Get all campaigns | Yes |
+| POST | `/api/donations` | Create campaign | Yes (Admin) |
+| GET | `/api/donations/:id` | Get campaign details | Yes |
+| POST | `/api/donations/:id/donate` | Make donation | Yes |
+
+### Admin Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/admin/dashboard` | Get admin stats | Yes (Admin) |
+| GET | `/api/admin/users` | Get all users | Yes (Admin) |
+| PUT | `/api/admin/users/:id/verify` | Verify user | Yes (Admin) |
+| GET | `/api/admin/reports` | Get reports | Yes (Admin) |
+| POST | `/api/admin/reports/:id/action` | Handle report | Yes (Admin) |
+
+---
+
+## 🗄 Database Schema
+
+### User Collection
+```javascript
+{
+  _id: ObjectId,
+  name: String (required),
+  email: String (required, unique),
+  password: String (required, hashed),
+  role: Enum ['student', 'alumni', 'admin'],
+  avatar: String (URL),
+  bio: String,
+  graduationYear: Number,
+  department: String,
+  company: String,
+  jobTitle: String,
+  location: String,
+  skills: [String],
+  socialLinks: {
+    linkedin: String,
+    github: String,
+    twitter: String
+  },
+  isVerified: Boolean (default: false),
+  refreshToken: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Post Collection
+```javascript
+{
+  _id: ObjectId,
+  author: ObjectId (ref: User),
+  title: String (required),
+  content: String (required),
+  images: [String],
+  upvotes: [ObjectId] (ref: User),
+  downvotes: [ObjectId] (ref: User),
+  commentsCount: Number,
+  tags: [String],
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Event Collection
+```javascript
+{
+  _id: ObjectId,
+  title: String (required),
+  description: String,
+  organizer: ObjectId (ref: User),
+  startDate: Date (required),
+  endDate: Date,
+  location: String,
+  type: Enum ['online', 'offline', 'hybrid'],
+  maxAttendees: Number,
+  attendees: [ObjectId] (ref: User),
+  isVerified: Boolean (default: false),
+  images: [String],
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Job Collection
+```javascript
+{
+  _id: ObjectId,
+  title: String (required),
+  company: String (required),
+  location: String,
+  type: Enum ['full-time', 'part-time', 'internship', 'contract'],
+  description: String,
+  requirements: [String],
+  salary: String,
+  postedBy: ObjectId (ref: User),
+  isVerified: Boolean (default: false),
+  applicants: [ObjectId] (ref: User),
+  deadline: Date,
+  createdAt: Date
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+Alumnihub/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/       # Business logic
+│   │   ├── models/            # Mongoose schemas
+│   │   ├── routes/            # API routes
+│   │   ├── middlewares/       # Express middlewares
+│   │   ├── services/          # Business services
+│   │   ├── utils/             # Helper functions
+│   │   ├── db/                # Database configuration
+│   │   ├── app.js             # Express app setup
+│   │   └── index.js           # Entry point
+│   ├── public/temp/           # Temporary file uploads
+│   ├── .env                   # Environment variables
+│   ├── package.json
+│   └── create-user.js         # User seeding script
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   ├── pages/             # Page components
+│   │   ├── context/           # React Context
+│   │   ├── services/          # API services
+│   │   ├── hooks/             # Custom hooks
+│   │   ├── lib/               # Utilities
+│   │   ├── App.tsx            # Root component
+│   │   └── main.tsx           # Entry point
+│   ├── public/
+│   │   ├── manifest.json      # PWA manifest
+│   │   └── service-worker.js  # PWA service worker
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   └── package.json
+│
+└── README.md
+```
+
+---
+
+## 🔐 Environment Variables
+
+### Backend (.env)
+
+```env
+# Server Configuration
+PORT=5001
+NODE_ENV=development
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/Alumni-Project
+
+# JWT Secrets
+ACCESS_TOKEN_SECRET=your-super-secret-access-token-key-here
+REFRESH_TOKEN_SECRET=your-super-secret-refresh-token-key-here
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_EXPIRY=10d
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+# Email Service (Nodemailer)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:5173
+```
+
+### Frontend (.env)
+
+```env
+# API Base URL
+VITE_API_URL=http://localhost:5001/api
+
+# App Configuration
+VITE_APP_NAME=AlumniHub
+VITE_APP_VERSION=1.0.0
+```
+
+---
+
+## 🎯 Future Enhancements
+
+- [ ] Real-time chat with WebSocket
+- [ ] Video call integration for mentorship
+- [ ] Advanced analytics dashboard
+- [ ] Mobile app (React Native)
+- [ ] AI-powered job recommendations
+- [ ] Resume builder and review system
+- [ ] Event livestreaming
+- [ ] Alumni directory with advanced filters
+
+---
 
 ## 🤝 Contributing
 
+Contributions are welcome! Please follow these steps:
+
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+---
 
-This project is for educational purposes.
+## 📄 License
 
-## 📧 Contact
-
-For questions or suggestions, please reach out to the development team.
-
-## Verification Test
-Commit made by: krishpatel2310 (kp23104161@gmail.com)
-Date: Sat Feb  7 15:03:49 IST 2026
+This project is licensed under the MIT License.
 
 ---
 
-## 🔐 Repository Verification
+## 👨‍💻 Developer
 
-**New Repository:** https://github.com/krishpatel2310/Alumnihub
-**Author:** krishpatel2310 (kp23104161@gmail.com)
-**Verified:** February 07, 2026 at 15:30 IST
+**Krish Patel**
+- GitHub: [@krishpatel2310](https://github.com/krishpatel2310)
+- Email: kp23104161@gmail.com
 
-This commit verifies Git credentials for the new repository.
+---
+
+## 📞 Support
+
+For support, email kp23104161@gmail.com or open an issue in the repository.
+
+---
+
+<div align="center">
+
+**Made with ❤️ by Krish Patel**
+
+⭐ Star this repository if you find it helpful!
+
+</div>
