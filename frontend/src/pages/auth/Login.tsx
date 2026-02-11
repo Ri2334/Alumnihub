@@ -188,6 +188,13 @@ export const Login = () => {
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
+
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">Don't have an account? </span>
+                <Link to="/auth/register" className="text-primary hover:underline font-medium">
+                  Register here
+                </Link>
+              </div>
             </form>
           </Form>
         </CardContent>

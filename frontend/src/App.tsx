@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 
 // Auth pages
 import { Login } from "./pages/auth/Login";
+import { Register } from "./pages/auth/Register";
 import { ForgotPassword } from "./pages/auth/ForgotPassword";
 import { OTPVerification } from "./pages/auth/OTPVerification";
 import { ResetPassword } from "./pages/auth/ResetPassword";
@@ -51,6 +52,7 @@ const App = () => (
             {/* Auth Routes - No Sidebar */}
             <Route path="/auth" element={<AuthLayout />}>
               <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
               <Route path="forgot-password" element={<ForgotPassword />} />
               <Route path="otp-verification" element={<OTPVerification />} />
               <Route path="reset-password" element={<ResetPassword />} />
