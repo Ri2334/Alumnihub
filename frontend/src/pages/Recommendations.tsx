@@ -102,7 +102,7 @@ export default function Recommendations() {
         const studentLocation = normalize(me.location);
 
         const mentorScored: MentorRecommendation[] = alumni.map((alum) => {
-          let score = 0;
+          let rawScore = 0;
 
           const alumCourse = normalize(alum.course);
           if (
@@ -112,22 +112,26 @@ export default function Recommendations() {
               alumCourse.includes(studentCourse) ||
               studentCourse.includes(alumCourse))
           ) {
-            score += 3;
+            rawScore += 3;
           }
 
           const alumLocation = normalize(alum.location);
           if (studentLocation && alumLocation && alumLocation === studentLocation) {
-            score += 1;
+            rawScore += 1;
           }
 
           if (Array.isArray(alum.skills) && alum.skills.length > 0) {
             const overlap = alum.skills.filter((s) => studentSkills.has(s));
-            score += overlap.length * 2;
+            rawScore += overlap.length * 2;
           }
+
+          // Normalize score into 0–1 range so we always show 0–100%
+          // Max rawScore with current weights is roughly 3 (course) + 1 (location) + 2*5 (skills) = 14
+          const normalizedScore = Math.min(rawScore / 14, 1);
 
           return {
             mentor: alum,
-            score,
+            score: normalizedScore,
             reason: "Rule-based match based on course, location and skills overlap",
           };
         });
