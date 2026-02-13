@@ -15,13 +15,14 @@ router.route("/change-password").post(verifyJWT, changeUserPassword)
 
 router.route("/user").get(verifyUserOrAdmin, getCurrentUser)
 
-router.route("/:userId").get( getUserById)
-
+// Recommendation endpoints MUST come before dynamic :userId route
 router.route("/recommendations/mentors").get(verifyJWT, getRecommendedMentors)
 router.route("/recommendations/careers").get(verifyJWT, getRecommendedCareerPaths)
 
 router.route("/update-user").patch(verifyJWT, updateUserDetails)
 
 router.route("/update-avatar").post(verifyJWT, upload.single("avatar"), updateUserAvatar)
+
+router.route("/:userId").get( getUserById)
 
 export default router;

@@ -26,6 +26,8 @@ export default function Settings() {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [skills, setSkills] = useState("");
+  const [interests, setInterests] = useState("");
   
   // Password change states
   const [currentPassword, setCurrentPassword] = useState("");
@@ -100,7 +102,19 @@ export default function Settings() {
         profileData.bio = bio.trim();
       }
       if (linkedinUrl && typeof linkedinUrl === 'string' && linkedinUrl.trim()) {
-        profileData.linkedinUrl = linkedinUrl.trim();
+        profileData.linkedin = linkedinUrl.trim();
+      }
+      if (skills && typeof skills === "string" && skills.trim()) {
+        profileData.skills = skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      if (interests && typeof interests === "string" && interests.trim()) {
+        profileData.interests = interests
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
 
       const response = await userService.updateProfile(profileData);
@@ -251,7 +265,13 @@ export default function Settings() {
       setLocation(user.location || "");
       setPhone(user.phone || "");
       setBio(user.bio || "");
-      setLinkedinUrl(user.linkedinUrl || "");
+      setLinkedinUrl(user.linkedin || "");
+      if (Array.isArray(user.skills)) {
+        setSkills(user.skills.join(", "));
+      }
+      if (Array.isArray(user.interests)) {
+        setInterests(user.interests.join(", "));
+      }
     }
   }, [user]);
 
@@ -454,6 +474,26 @@ export default function Settings() {
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Tell us about yourself..."
                     className="min-h-[100px]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="skills">Skills (comma separated)</Label>
+                  <Input
+                    id="skills"
+                    value={skills}
+                    onChange={(e) => setSkills(e.target.value)}
+                    placeholder="e.g., JavaScript, React, Node.js"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="interests">Interests (comma separated)</Label>
+                  <Input
+                    id="interests"
+                    value={interests}
+                    onChange={(e) => setInterests(e.target.value)}
+                    placeholder="e.g., Backend, Data Science, Cloud"
                   />
                 </div>
 

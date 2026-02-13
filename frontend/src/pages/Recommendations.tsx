@@ -11,6 +11,21 @@ import { UserPlus, Sparkles } from "lucide-react";
 import { ChatDialog } from "@/components/chat/ChatDialog";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
 
+interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  currentPosition?: string;
+  company?: string;
+  graduationYear?: number;
+  course?: string;
+  location?: string;
+  avatar?: string;
+  skills?: string[];
+  interests?: string[];
+}
+
 interface MentorRecommendation {
   mentor: {
     _id: string;
@@ -44,6 +59,7 @@ export default function Recommendations() {
   const { toast } = useToast();
   const [loadingMentors, setLoadingMentors] = useState(true);
   const [loadingCareers, setLoadingCareers] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [mentors, setMentors] = useState<MentorRecommendation[]>([]);
   const [careers, setCareers] = useState<CareerRecommendation[]>([]);
 
@@ -53,43 +69,215 @@ export default function Recommendations() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchMentors();
-    fetchCareers();
-  }, []);
+    const fetchData = async () => {
+      try {
+        setLoadingMentors(true);
+        setLoadingCareers(true);
 
-  const fetchMentors = async () => {
-    try {
-      setLoadingMentors(true);
-      const res = await userService.getMentorRecommendations();
-      setMentors(Array.isArray(res?.data) ? res.data : []);
-    } catch (error: any) {
-      console.error("Mentor recommendations error:", error);
-      toast({
-        title: "Unable to load mentor recommendations",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingMentors(false);
-    }
-  };
+        const [meRes, usersRes] = await Promise.all([
+          userService.getCurrentUser(),
+          userService.getAllUsers(),
+        ]);
 
-  const fetchCareers = async () => {
-    try {
-      setLoadingCareers(true);
-      const res = await userService.getCareerRecommendations();
-      setCareers(Array.isArray(res?.data) ? res.data : []);
-    } catch (error: any) {
-      console.error("Career recommendations error:", error);
-      toast({
-        title: "Unable to load career recommendations",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingCareers(false);
-    }
-  };
+        const me = meRes?.data as UserProfile;
+        const allUsers = (usersRes?.data || []) as UserProfile[];
+
+        if (!me) {
+          throw new Error("Current user not found");
+        }
+
+        setCurrentUser(me);
+
+        // ---- Mentor recommendations (frontend rule-based) ----
+        const alumni = allUsers.filter((u) => u.role === "alumni");
+
+        const normalize = (value?: string | number) =>
+          (value ?? "")
+            .toString()
+            .toLowerCase()
+            .replace(/\s+/g, "");
+
+        const studentSkills = new Set(me.skills || []);
+        const studentCourse = normalize(me.course);
+        const studentLocation = normalize(me.location);
+
+        const mentorScored: MentorRecommendation[] = alumni.map((alum) => {
+          let score = 0;
+
+          const alumCourse = normalize(alum.course);
+          if (
+            studentCourse &&
+            alumCourse &&
+            (alumCourse === studentCourse ||
+              alumCourse.includes(studentCourse) ||
+              studentCourse.includes(alumCourse))
+          ) {
+            score += 3;
+          }
+
+          const alumLocation = normalize(alum.location);
+          if (studentLocation && alumLocation && alumLocation === studentLocation) {
+            score += 1;
+          }
+
+          if (Array.isArray(alum.skills) && alum.skills.length > 0) {
+            const overlap = alum.skills.filter((s) => studentSkills.has(s));
+            score += overlap.length * 2;
+          }
+
+          return {
+            mentor: alum,
+            score,
+            reason: "Rule-based match based on course, location and skills overlap",
+          };
+        });
+
+        const sortedMentors = mentorScored
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10);
+
+        setMentors(sortedMentors);
+
+        // ---- Career path recommendations (frontend rule-based) ----
+        const careerPaths = [
+          {
+            key: "backend_engineer",
+            name: "Backend Engineer",
+            description:
+              "Designs and builds server-side applications, APIs, and databases. Focuses on scalability, performance, and security.",
+            recommendedSkills: [
+              "Node.js",
+              "Express",
+              "MongoDB",
+              "SQL",
+              "REST APIs",
+              "Authentication",
+              "Docker",
+              "System Design",
+            ],
+            roadmap: [
+              "Master JavaScript/TypeScript fundamentals",
+              "Learn Node.js and Express for building APIs",
+              "Understand databases (MongoDB and/or SQL)",
+            ],
+          },
+          {
+            key: "frontend_engineer",
+            name: "Frontend Engineer",
+            description:
+              "Builds interactive user interfaces and web applications, focusing on user experience, accessibility, and performance.",
+            recommendedSkills: [
+              "HTML",
+              "CSS",
+              "JavaScript",
+              "React",
+              "State Management",
+              "Responsive Design",
+            ],
+            roadmap: [
+              "Learn HTML, CSS, and modern JavaScript",
+              "Build projects using React or a similar framework",
+            ],
+          },
+          {
+            key: "fullstack_developer",
+            name: "Full Stack Developer",
+            description:
+              "Works on both frontend and backend, able to build end-to-end web applications.",
+            recommendedSkills: [
+              "React",
+              "Node.js",
+              "Express",
+              "MongoDB",
+              "REST APIs",
+            ],
+            roadmap: [
+              "Learn frontend fundamentals",
+              "Learn backend fundamentals",
+              "Build and deploy full-stack projects",
+            ],
+          },
+          {
+            key: "data_analyst",
+            name: "Data Analyst",
+            description:
+              "Analyzes data to generate insights, dashboards, and reports to support business decisions.",
+            recommendedSkills: [
+              "SQL",
+              "Excel",
+              "Python",
+              "Pandas",
+              "Data Visualization",
+              "Statistics",
+            ],
+            roadmap: [
+              "Learn SQL and basic statistics",
+              "Use Python and Pandas for data analysis",
+            ],
+          },
+          {
+            key: "data_scientist",
+            name: "Data Scientist",
+            description:
+              "Builds models and experiments using data, machine learning, and statistics.",
+            recommendedSkills: [
+              "Python",
+              "Machine Learning",
+              "Statistics",
+              "Pandas",
+              "NumPy",
+              "Scikit-learn",
+            ],
+            roadmap: [
+              "Strengthen math and statistics foundations",
+              "Study common ML algorithms and evaluation",
+            ],
+          },
+        ];
+
+        const userSkills = new Set(me.skills || []);
+
+        const careerScored: CareerRecommendation[] = careerPaths.map((path) => {
+          const overlap = (path.recommendedSkills || []).filter((skill) =>
+            userSkills.has(skill)
+          );
+
+          const score = overlap.length / Math.max(path.recommendedSkills.length, 1);
+
+          return {
+            key: path.key,
+            name: path.name,
+            description: path.description,
+            recommendedSkills: path.recommendedSkills,
+            roadmap: path.roadmap,
+            score,
+            matchedSkills: overlap,
+            reason: overlap.length
+              ? "Matched based on overlapping skills"
+              : "Potential path based on general tech profile",
+          };
+        });
+
+        const sortedCareers = careerScored
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5);
+
+        setCareers(sortedCareers);
+      } catch (error: any) {
+        console.error("Recommendation error:", error);
+        toast({
+          title: "Unable to load recommendations",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingMentors(false);
+        setLoadingCareers(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
 
   const getInitials = (name: string) =>
     name
