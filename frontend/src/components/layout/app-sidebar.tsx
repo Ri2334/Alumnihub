@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Flag,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -38,6 +39,7 @@ const baseNavigation = [
   { title: "Alumni Directory", url: "/alumni", icon: Users, color: "text-purple-500", activeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
   { title: "Events", url: "/events", icon: Calendar, color: "text-blue-500", activeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   { title: "Jobs", url: "/jobs", icon: Briefcase, color: "text-orange-500", activeColor: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
+  { title: "AI Recommendations", url: "/recommendations", icon: Sparkles, color: "text-amber-500", activeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
   { title: "Donations", url: "/donations", icon: Heart, color: "text-emerald-500", activeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
   { title: "Community Chat", url: "/communications", icon: MessageSquare, color: "text-indigo-500", activeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
 ];

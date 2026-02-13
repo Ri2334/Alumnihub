@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  skills: {
+    type: [String],
+    default: [],
+  },
+  interests: {
+    type: [String],
+    default: [],
+  },
   location: {
     type: String,
     default: null,
@@ -98,6 +106,12 @@ const userSchema = new mongoose.Schema({
   reportCount: {
     type: Number,
     default: 0
+  },
+  // Cached vector representation of the user's profile for AI recommendations
+  profileEmbedding: {
+    type: [Number],
+    select: false,
+    default: undefined
   }
 }, { timestamps: true })
 

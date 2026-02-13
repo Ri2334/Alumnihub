@@ -3,6 +3,54 @@ import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import { extractPublicId, uploadOnCloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { getEmbeddingForText } from '../services/embedding.service.js';
+import { rankBySimilarity } from '../services/similarity.service.js';
+import { careerPaths } from '../config/career-paths.js';
+
+// Build a descriptive text representation of a user's profile for embeddings
+const buildUserProfileText = (user) => {
+  const parts = [];
+
+  if (user.role === "student") {
+    parts.push("Student profile");
+  } else if (user.role === "alumni") {
+    parts.push("Alumni profile");
+  }
+
+  if (user.course) {
+    parts.push(`Course: ${user.course}`);
+  }
+
+  if (user.graduationYear) {
+    parts.push(`Graduation year: ${user.graduationYear}`);
+  }
+
+  if (user.currentPosition) {
+    parts.push(`Current position: ${user.currentPosition}`);
+  }
+
+  if (user.company) {
+    parts.push(`Company: ${user.company}`);
+  }
+
+  if (Array.isArray(user.skills) && user.skills.length > 0) {
+    parts.push(`Skills: ${user.skills.join(", ")}`);
+  }
+
+  if (Array.isArray(user.interests) && user.interests.length > 0) {
+    parts.push(`Interests: ${user.interests.join(", ")}`);
+  }
+
+  if (user.location) {
+    parts.push(`Location: ${user.location}`);
+  }
+
+  if (user.bio) {
+    parts.push(`Bio: ${user.bio}`);
+  }
+
+  return parts.join(". ");
+};
 
 const changeUserPassword = asyncHandler(async (req, res) => {
 
@@ -154,6 +202,277 @@ const deleteUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User deleted successfully"));
 });
 
+// Recommend alumni mentors for the current student using embeddings when available,
+// with a simple rule-based fallback if embeddings are not configured.
+const getRecommendedMentors = asyncHandler(async (req, res) => {
+  const currentUserId = req.user?._id;
+
+  if (!currentUserId) {
+    throw new ApiError(401, "Unauthorized");
+  }
+
+  const student = await User.findById(currentUserId).select(
+    "-password -refreshToken"
+  );
+
+  if (!student) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  if (student.role !== "student") {
+    throw new ApiError(
+      403,
+      "Mentor recommendations are only available for student accounts"
+    );
+  }
+
+  // Try to compute an embedding for the student profile
+  const studentProfileText = buildUserProfileText(student);
+  const studentEmbedding = await getEmbeddingForText(studentProfileText);
+
+  // Fetch active alumni as potential mentors
+  const alumni = await User.find({
+    role: "alumni",
+    banStatus: "active",
+  }).select(
+    "name email currentPosition company skills interests graduationYear course location avatar bio +profileEmbedding"
+  );
+
+  if (!alumni || alumni.length === 0) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, [], "No alumni mentors available yet"));
+  }
+
+  // If we do not have embeddings configured, fall back to a simple rule-based ranking
+  if (!studentEmbedding) {
+    const studentSkills = new Set(student.skills || []);
+    const studentCourse = student.course;
+    const studentLocation = student.location;
+
+    const scored = alumni.map((alum) => {
+      let score = 0;
+
+      // Shared course / department
+      if (studentCourse && alum.course && alum.course === studentCourse) {
+        score += 3;
+      }
+
+      // Shared location
+      if (studentLocation && alum.location && alum.location === studentLocation) {
+        score += 1;
+      }
+
+      // Overlapping skills
+      if (Array.isArray(alum.skills) && alum.skills.length > 0) {
+        const overlap = alum.skills.filter((s) => studentSkills.has(s));
+        score += overlap.length * 2;
+      }
+
+      return {
+        user: alum,
+        score,
+      };
+    });
+
+    const sorted = scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((item) => ({
+        mentor: item.user,
+        score: item.score,
+        reason: "Rule-based match (course/location/skills overlap)",
+      }));
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          sorted,
+          "Mentor recommendations generated using rule-based matching (embeddings not configured)"
+        )
+      );
+  }
+
+  // Embedding-based ranking path
+  const candidateVectors = [];
+
+  for (const alum of alumni) {
+    let vector = alum.profileEmbedding;
+
+    if (!vector) {
+      const text = buildUserProfileText(alum);
+      vector = await getEmbeddingForText(text);
+
+      // Cache on the user document if we got a valid vector
+      if (vector && Array.isArray(vector)) {
+        alum.profileEmbedding = vector;
+        // Save without triggering password hashing etc.
+        await alum.save({ validateBeforeSave: false });
+      }
+    }
+
+    if (vector && Array.isArray(vector)) {
+      candidateVectors.push({
+        id: alum._id.toString(),
+        vector,
+        user: alum,
+      });
+    }
+  }
+
+  if (candidateVectors.length === 0) {
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          [],
+          "No mentors with valid embeddings available yet"
+        )
+      );
+  }
+
+  const ranked = rankBySimilarity(studentEmbedding, candidateVectors);
+
+  const topMentors = ranked.slice(0, 10).map((item) => ({
+    mentor: item.user,
+    score: item.score,
+  }));
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        topMentors,
+        "Mentor recommendations generated successfully"
+      )
+    );
+});
+
+// Recommend career paths for the current user (typically a student).
+// Uses embeddings when available, with a rule-based skills overlap fallback.
+const getRecommendedCareerPaths = asyncHandler(async (req, res) => {
+  const currentUserId = req.user?._id;
+
+  if (!currentUserId) {
+    throw new ApiError(401, "Unauthorized");
+  }
+
+  const user = await User.findById(currentUserId).select(
+    "-password -refreshToken"
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const profileText = buildUserProfileText(user);
+  const userEmbedding = await getEmbeddingForText(profileText);
+
+  // If embeddings are not configured, fall back to rule-based ranking on skills.
+  if (!userEmbedding) {
+    const userSkills = new Set(user.skills || []);
+
+    const scored = careerPaths.map((path) => {
+      const overlap = (path.recommendedSkills || []).filter((skill) =>
+        userSkills.has(skill)
+      );
+
+      // Simple score: number of overlapping skills
+      const score = overlap.length;
+
+      return {
+        name: path.name,
+        key: path.key,
+        description: path.description,
+        recommendedSkills: path.recommendedSkills,
+        roadmap: path.roadmap,
+        score,
+        matchedSkills: overlap,
+        reason: "Rule-based match based on overlapping skills",
+      };
+    });
+
+    const sorted = scored.sort((a, b) => b.score - a.score).slice(0, 5);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          sorted,
+          "Career path recommendations generated using rule-based matching (embeddings not configured)"
+        )
+      );
+  }
+
+  // Embedding-based ranking
+  // Lazily compute and cache embeddings for each career path description.
+  const candidates = [];
+
+  for (const path of careerPaths) {
+    let vec = path.embedding;
+
+    if (!vec) {
+      const text = `${path.name}. ${path.description}. Recommended skills: ${(
+        path.recommendedSkills || []
+      ).join(", ")}`;
+
+      vec = await getEmbeddingForText(text);
+
+      // Cache in memory for future requests
+      if (vec && Array.isArray(vec)) {
+        // eslint-disable-next-line no-param-reassign
+        path.embedding = vec;
+      }
+    }
+
+    if (vec && Array.isArray(vec)) {
+      candidates.push({
+        id: path.key,
+        vector: vec,
+        path,
+      });
+    }
+  }
+
+  if (candidates.length === 0) {
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          [],
+          "No career paths with valid embeddings available yet"
+        )
+      );
+  }
+
+  const ranked = rankBySimilarity(userEmbedding, candidates);
+
+  const topPaths = ranked.slice(0, 5).map((item) => ({
+    name: item.path.name,
+    key: item.path.key,
+    description: item.path.description,
+    recommendedSkills: item.path.recommendedSkills,
+    roadmap: item.path.roadmap,
+    score: item.score,
+  }));
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        topPaths,
+        "Career path recommendations generated successfully"
+      )
+    );
+});
+
 export {
 
     changeUserPassword,
@@ -162,6 +481,8 @@ export {
     updateUserDetails,
     updateUserAvatar,
     getAllUser,
-    deleteUser
+  deleteUser,
+  getRecommendedMentors,
+  getRecommendedCareerPaths
 };
 

@@ -97,7 +97,15 @@ export const userService = {
     newPassword: string;
   }): Promise<ApiResponse> => {
     return await api.post('/users/change-password', data);
-  }
+  },
+
+  getMentorRecommendations: async (): Promise<ApiResponse> => {
+    return await api.get('/users/recommendations/mentors');
+  },
+
+  getCareerRecommendations: async (): Promise<ApiResponse> => {
+    return await api.get('/users/recommendations/careers');
+  },
 };
 
 // Admin Services
