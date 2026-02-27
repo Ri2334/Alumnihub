@@ -1,5 +1,5 @@
 import express from 'express';
-import { changeUserPassword,  getAllUser,  getCurrentUser,  getUserById,  updateUserAvatar,  updateUserDetails, getRecommendedMentors, getRecommendedCareerPaths} from '../controllers/user.controller.js';
+import { changeUserPassword,  getAllUser,  getCurrentUser,  getUserById,  updateUserAvatar,  updateUserDetails, getRecommendedMentors, getRecommendedCareerPaths, updateUserRole } from '../controllers/user.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 import { verifyJWT, verifyUserOrAdmin } from '../middlewares/auth.middleware.js';
 
@@ -20,6 +20,8 @@ router.route("/recommendations/mentors").get(verifyJWT, getRecommendedMentors)
 router.route("/recommendations/careers").get(verifyJWT, getRecommendedCareerPaths)
 
 router.route("/update-user").patch(verifyJWT, updateUserDetails)
+
+router.route("/update-role").patch(verifyJWT, updateUserRole)
 
 router.route("/update-avatar").post(verifyJWT, upload.single("avatar"), updateUserAvatar)
 

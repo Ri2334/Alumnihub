@@ -535,6 +535,44 @@ const getRecommendedCareerPaths = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUserRole = asyncHandler(async (req, res) => {
+  try {
+    const { role } = req.body;
+
+    // Validate role
+    if (!role || !['student', 'alumni'].includes(role)) {
+      throw new ApiError(400, 'Invalid role. Must be either "student" or "alumni"');
+    }
+
+    // Get user from JWT token
+    const userId = req.user._id;
+
+    // Update user role
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken -resetPasswordOTP -resetPasswordExpires -profileEmbedding');
+
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          user,
+          `Role updated to ${role} successfully`
+        )
+      );
+  } catch (error) {
+    console.error('Update role error:', error);
+    throw new ApiError(500, error.message || 'Failed to update role');
+  }
+});
+
 export {
 
     changeUserPassword,
@@ -545,6 +583,7 @@ export {
     getAllUser,
   deleteUser,
   getRecommendedMentors,
-  getRecommendedCareerPaths
+  getRecommendedCareerPaths,
+  updateUserRole
 };
 

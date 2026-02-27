@@ -94,8 +94,10 @@ export const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const backendURL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    window.location.href = `${backendURL}/api/auth/google`;
+    // VITE_API_URL already includes /api, so we need the base URL
+    const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+    const baseURL = apiURL.replace('/api', '');
+    window.location.href = `${baseURL}/api/auth/google`;
   };
 
   return (

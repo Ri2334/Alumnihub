@@ -15,6 +15,7 @@ export const GoogleAuthSuccess = () => {
       try {
         const token = searchParams.get('token');
         const userStr = searchParams.get('user');
+        const isNewUser = searchParams.get('isNewUser') === 'true';
 
         if (!token || !userStr) {
           throw new Error('Missing authentication data');
@@ -22,6 +23,14 @@ export const GoogleAuthSuccess = () => {
 
         // Parse user data
         const userData = JSON.parse(decodeURIComponent(userStr));
+
+        // If it's a new user, redirect to role selection
+        if (isNewUser) {
+          navigate(`/auth/role-selection?token=${token}&user=${encodeURIComponent(userStr)}`, { 
+            replace: true 
+          });
+          return;
+        }
 
         // Store token
         localStorage.setItem('accessToken', token);
@@ -36,7 +45,7 @@ export const GoogleAuthSuccess = () => {
         // Success toast
         toast({
           title: 'Login successful!',
-          description: 'Welcome to AlumniHub!',
+          description: 'Welcome back to AlumniHub!',
           variant: 'success',
         });
 

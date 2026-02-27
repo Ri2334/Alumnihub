@@ -27,6 +27,7 @@ import { ForgotPassword } from "./pages/auth/ForgotPassword";
 import { OTPVerification } from "./pages/auth/OTPVerification";
 import { ResetPassword } from "./pages/auth/ResetPassword";
 import { GoogleAuthSuccess } from "./pages/auth/GoogleAuthSuccess";
+import { RoleSelection } from "./pages/auth/RoleSelection";
 
 // Admin pages
 import { Dashboard as AdminDashboard } from "./pages/admin/Dashboard";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="otp-verification" element={<OTPVerification />} />
               <Route path="reset-password" element={<ResetPassword />} />
               <Route path="google/success" element={<GoogleAuthSuccess />} />
+              <Route path="role-selection" element={<RoleSelection />} />
             </Route>
 
             {/* Protected User Routes - With Sidebar */}

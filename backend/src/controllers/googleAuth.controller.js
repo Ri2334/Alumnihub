@@ -24,6 +24,9 @@ const googleAuthCallback = asyncHandler(async (req, res) => {
       throw new ApiError(401, 'Google authentication failed');
     }
 
+    // Check if this is a new user (just created)
+    const isNewUser = user.createdAt && new Date().getTime() - new Date(user.createdAt).getTime() < 5000;
+
     // Generate tokens
     const { accessToken, refreshToken } = await generateUserAccessAndRefreshToken(user._id);
 
@@ -45,7 +48,7 @@ const googleAuthCallback = asyncHandler(async (req, res) => {
     res
       .cookie('accessToken', accessToken, options)
       .cookie('refreshToken', refreshToken, options)
-      .redirect(`${frontendURL}/auth/google/success?token=${accessToken}&user=${encodeURIComponent(JSON.stringify(loggedInUser))}`);
+      .redirect(`${frontendURL}/auth/google/success?token=${accessToken}&user=${encodeURIComponent(JSON.stringify(loggedInUser))}&isNewUser=${isNewUser}`);
   } catch (error) {
     console.error('Google Auth Callback Error:', error);
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
