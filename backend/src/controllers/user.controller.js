@@ -573,6 +573,120 @@ const updateUserRole = asyncHandler(async (req, res) => {
   }
 });
 
+// Get alumni locations for world map
+const getAlumniLocations = asyncHandler(async (req, res) => {
+  try {
+    const alumni = await User.find({
+      role: 'alumni',
+      $or: [
+        { 'coordinates.latitude': { $ne: null } },
+        { city: { $ne: null } },
+        { location: { $ne: null } }
+      ]
+    }).select('name avatar city country location coordinates currentPosition company graduationYear');
+
+    const locations = alumni.map(user => ({
+      id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+      city: user.city || user.location?.split(',')[0]?.trim(),
+      country: user.country || user.location?.split(',').pop()?.trim(),
+      coordinates: user.coordinates,
+      currentPosition: user.currentPosition,
+      company: user.company,
+      graduationYear: user.graduationYear
+    }));
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, locations, "Alumni locations fetched successfully"));
+  } catch (error) {
+    console.error('Get alumni locations error:', error);
+    throw new ApiError(500, error.message || 'Failed to fetch alumni locations');
+  }
+});
+
+// Get featured/spotlight alumni
+const getFeaturedAlumni = asyncHandler(async (req, res) => {
+  try {
+    const now = new Date();
+    
+    // Get manually featured alumni (those with isFeatured = true and valid featuredUntil date)
+    let featuredAlumni = await User.find({
+      role: 'alumni',
+      isFeatured: true,
+      $or: [
+        { featuredUntil: null },
+        { featuredUntil: { $gt: now } }
+      ]
+    })
+      .select('name avatar bio currentPosition company graduationYear achievements linkedin github location')
+      .limit(3)
+      .sort({ featuredUntil: -1 });
+
+    // If we don't have 3 featured alumni, fill with random notable alumni
+    if (featuredAlumni.length < 3) {
+      const notableAlumni = await User.find({
+        role: 'alumni',
+        _id: { $nin: featuredAlumni.map(a => a._id) },
+        $or: [
+          { achievements: { $exists: true, $ne: [] } },
+          { currentPosition: { $ne: null } },
+          { company: { $ne: null } }
+        ]
+      })
+        .select('name avatar bio currentPosition company graduationYear achievements linkedin github location')
+        .sort({ graduationYear: 1 }) // Older alumni first
+        .limit(3 - featuredAlumni.length);
+
+      featuredAlumni = [...featuredAlumni, ...notableAlumni];
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, featuredAlumni, "Featured alumni fetched successfully"));
+  } catch (error) {
+    console.error('Get featured alumni error:', error);
+    throw new ApiError(500, error.message || 'Failed to fetch featured alumni');
+  }
+});
+
+// Update user to be featured (admin function)
+const setFeaturedAlumni = asyncHandler(async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { isFeatured, duration } = req.body; // duration in days
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (user.role !== 'alumni') {
+      throw new ApiError(400, "Only alumni can be featured");
+    }
+
+    user.isFeatured = isFeatured;
+    
+    if (isFeatured && duration) {
+      const featuredUntil = new Date();
+      featuredUntil.setDate(featuredUntil.getDate() + parseInt(duration));
+      user.featuredUntil = featuredUntil;
+    } else if (!isFeatured) {
+      user.featuredUntil = null;
+    }
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, `User ${isFeatured ? 'featured' : 'unfeatured'} successfully`));
+  } catch (error) {
+    console.error('Set featured alumni error:', error);
+    throw new ApiError(500, error.message || 'Failed to update featured status');
+  }
+});
+
 export {
 
     changeUserPassword,
@@ -584,6 +698,9 @@ export {
   deleteUser,
   getRecommendedMentors,
   getRecommendedCareerPaths,
-  updateUserRole
+  updateUserRole,
+  getAlumniLocations,
+  getFeaturedAlumni,
+  setFeaturedAlumni
 };
 

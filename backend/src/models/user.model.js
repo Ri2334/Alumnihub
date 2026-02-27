@@ -68,6 +68,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  coordinates: {
+    latitude: {
+      type: Number,
+      default: null,
+    },
+    longitude: {
+      type: Number,
+      default: null,
+    }
+  },
+  city: {
+    type: String,
+    default: null,
+  },
+  country: {
+    type: String,
+    default: null,
+  },
   phone: {
     type: String,
     default: null,
@@ -76,6 +94,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: 500,
     default: null
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
+  featuredUntil: {
+    type: Date,
+    default: null,
+  },
+  achievements: {
+    type: [String],
+    default: [],
   },
   linkedin: {
     type: String,

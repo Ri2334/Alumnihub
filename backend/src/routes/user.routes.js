@@ -1,5 +1,5 @@
 import express from 'express';
-import { changeUserPassword,  getAllUser,  getCurrentUser,  getUserById,  updateUserAvatar,  updateUserDetails, getRecommendedMentors, getRecommendedCareerPaths, updateUserRole } from '../controllers/user.controller.js';
+import { changeUserPassword,  getAllUser,  getCurrentUser,  getUserById,  updateUserAvatar,  updateUserDetails, getRecommendedMentors, getRecommendedCareerPaths, updateUserRole, getAlumniLocations, getFeaturedAlumni, setFeaturedAlumni } from '../controllers/user.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 import { verifyJWT, verifyUserOrAdmin } from '../middlewares/auth.middleware.js';
 
@@ -18,6 +18,11 @@ router.route("/user").get(verifyUserOrAdmin, getCurrentUser)
 // Recommendation endpoints MUST come before dynamic :userId route
 router.route("/recommendations/mentors").get(verifyJWT, getRecommendedMentors)
 router.route("/recommendations/careers").get(verifyJWT, getRecommendedCareerPaths)
+
+// Alumni features
+router.route("/alumni/locations").get(getAlumniLocations)
+router.route("/alumni/featured").get(getFeaturedAlumni)
+router.route("/alumni/featured/:userId").patch(verifyJWT, setFeaturedAlumni)
 
 router.route("/update-user").patch(verifyJWT, updateUserDetails)
 
