@@ -9,6 +9,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 // User pages
 import Dashboard from "./pages/Dashboard";
 import Alumni from "./pages/Alumni";
+import AlumniNetwork from "./pages/AlumniNetwork";
 import Events from "./pages/Events";
 import Jobs from "./pages/Jobs";
 import PostJob from "./pages/PostJob";
@@ -71,6 +72,7 @@ const App = () => (
             }>
               <Route index element={<Dashboard />} />
               <Route path="alumni" element={<Alumni />} />
+              <Route path="alumni-network" element={<AlumniNetwork />} />
               <Route path="events" element={<Events />} />
               <Route path="jobs" element={<Jobs />} />
               <Route path="jobs/post" element={<PostJob />} />

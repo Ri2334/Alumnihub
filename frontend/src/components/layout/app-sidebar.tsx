@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Flag,
   Sparkles,
+  Globe,
 } from "lucide-react";
 
 import {
@@ -37,6 +38,7 @@ import { useAuth } from "@/context/AuthContext";
 const baseNavigation = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "text-sky-500", activeColor: "bg-sky-500/10 text-sky-600 dark:text-sky-400" },
   { title: "Alumni Directory", url: "/alumni", icon: Users, color: "text-purple-500", activeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
+  { title: "Alumni Network", url: "/alumni-network", icon: Globe, color: "text-violet-500", activeColor: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
   { title: "Events", url: "/events", icon: Calendar, color: "text-blue-500", activeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   { title: "Jobs", url: "/jobs", icon: Briefcase, color: "text-orange-500", activeColor: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
   { title: "AI Recommendations", url: "/recommendations", icon: Sparkles, color: "text-amber-500", activeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
