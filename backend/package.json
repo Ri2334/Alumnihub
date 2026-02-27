@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "type": "module",
-"scripts": {
-  "start": "node src/index.js",
-  "test": "true"
-},
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "true"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,10 +20,13 @@
     "csv-parser": "^3.2.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
-    "otp-generator": "^4.0.1"
+    "otp-generator": "^4.0.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   }
 }

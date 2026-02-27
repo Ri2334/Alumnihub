@@ -19,9 +19,18 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function() {
+      // Password is not required for Google OAuth users
+      return !this.googleId;
+    },
     minlength: [6, 'Password must be at least 6 characters long'],
     trim: true
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows multiple null values
+    default: null
   },
   role: {
     type: String,
@@ -118,8 +127,12 @@ const userSchema = new mongoose.Schema({
 // Add pre('save') middleware for individual document saves
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
+  // Skip password hashing for Google OAuth users
+  if (this.googleId && !this.password) return next();
   // Hash the password before saving it to the database
-  this.password = await bcrypt.hash(this.password, 10);
+  if (this.password) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
   next();
 });
 
