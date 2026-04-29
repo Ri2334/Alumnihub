@@ -521,17 +521,14 @@ This project is licensed under the MIT License.
 - GitHub: [@krishpatel2310](https://github.com/krishpatel2310)
 - Email: kp23104161@gmail.com
 
----
-
-## 📞 Support
-
-For support, email kp23104161@gmail.com or open an issue in the repository.
-
+**Rishi Joshi**
+- GitHub: [@Ri2334](https://github.com/Ri2334)
+- - Email: rishi.joshi.ddu@gmail.com
 ---
 
 <div align="center">
 
-**Made with ❤️ by Krish Patel**
+**Made with ❤️ by Krish Patel & Joshi Rishi**
 
 ⭐ Star this repository if you find it helpful!
 
