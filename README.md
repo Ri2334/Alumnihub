@@ -523,7 +523,7 @@ This project is licensed under the MIT License.
 
 **Rishi Joshi**
 - GitHub: [@Ri2334](https://github.com/Ri2334)
-- - Email: rishi.joshi.ddu@gmail.com
+- Email: rishi.joshi.ddu@gmail.com
 ---
 
 <div align="center">
